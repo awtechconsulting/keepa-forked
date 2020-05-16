@@ -853,7 +853,7 @@ class Keepa(object):
                    'seller': seller}
         return self._request('seller', payload)['sellers']
 
-    def product_finder(self, product_parms, domain='US'):
+    def product_finder(self, product_parms, domain='US', include_details=False):
         """Query the keepa product database to find products matching
         your criteria. Almost all product fields can be searched for
         and sorted by.
@@ -1866,6 +1866,30 @@ class Keepa(object):
             One of the following Amazon domains: RESERVED, US, GB, DE,
             FR, JP, CA, CN, IT, ES, IN, MX Defaults to US.
 
+        include_details : bool, optional
+            If False, returns just the list of product IDs.  If True, returns the full
+            response payload, including the 'totalResults' field which allows the caller
+            to know whether or not the full list of products was retrieved.
+
+        Returns
+        -------
+        response : dict or list
+
+        If include_details is False, returns a list of asins
+        If include_details is True, returns a Dictionary containing the following
+        fields:
+        timestamp: Keepa timestamp
+        tokensLeft: The number of API tokens remaining.
+        refillIn: The amount of time remaining for the tokens to be refilled.
+        refillRate: The number of tokens added per minute.
+        tokenFlowReduction:
+        tokensConsumed: The number of tokens consumed by the API call.
+        processingTimeInMs: The time it took Keepa to process the request.
+        asinList: The list of asins.
+        totalResults: The number of asins matching the query filter parameters.
+
+
+
         Examples
         --------
         Query for all of Jim Butcher's books
@@ -1889,6 +1913,10 @@ class Keepa(object):
                    'selection': json.dumps(product_parms)}
 
         response = self._request('query', payload)
+
+        if include_details is True:
+            return response
+
         return response['asinList']
 
     def deals(self, deal_parms, domain='US'):
