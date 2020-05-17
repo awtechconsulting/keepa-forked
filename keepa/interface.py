@@ -853,7 +853,9 @@ class Keepa(object):
                    'seller': seller}
         return self._request('seller', payload)['sellers']
 
-    def product_finder(self, product_parms, domain='US', include_details=False):
+    def product_finder(
+        self, product_parms, domain='US', include_details=False, sort_fields=None,
+    ):
         """Query the keepa product database to find products matching
         your criteria. Almost all product fields can be searched for
         and sorted by.
@@ -1871,6 +1873,18 @@ class Keepa(object):
             response payload, including the 'totalResults' field which allows the caller
             to know whether or not the full list of products was retrieved.
 
+        sort_fields :  list, optional
+            Sorting is optional, by default results are sorted ascending by current
+            sales rank sort. Can contain up to three sorting directions. Each entry must
+            be of the format:
+            [ fieldName, sortDirection ]
+            fieldName:
+            Any of the filters below that are either a String or Integer. The fieldName
+            must not include "_lte" or "_gte".
+            sortDirection:
+            "asc" for ascending or "desc" for descending
+            Example: [ ["current_SALES", "asc"] ]
+
         Returns
         -------
         response : dict or list
@@ -1888,9 +1902,8 @@ class Keepa(object):
         asinList: The list of asins.
         totalResults: The number of asins matching the query filter parameters.
 
-
-
         Examples
+
         --------
         Query for all of Jim Butcher's books
 
@@ -1911,6 +1924,9 @@ class Keepa(object):
         payload = {'key': self.accesskey,
                    'domain': DCODES.index(domain),
                    'selection': json.dumps(product_parms)}
+
+        if sort_fields is not None:
+            payload["sort"] = sort_fields
 
         response = self._request('query', payload)
 
